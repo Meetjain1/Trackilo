@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="384" version="1.1" viewBox="0 0 512 384" xmlns="http://www.w3.org/2000/svg">
+  <!-- Black rectangular background -->
+  <rect x="0" y="0" width="512" height="384" fill="#000"/>
+  
+  <!-- Main T shape in white -->
+  <path d="M160 64 L352 64 L352 128 L288 128 L288 320 L224 320 L224 128 L160 128 Z" fill="#fff"/>
+  
+  <!-- Diagonal stripes -->
+  <g fill="#fff" opacity="0.3">
+    <path d="M160 64 L224 64 L160 128 Z"/>
+    <path d="M224 64 L288 64 L224 128 Z"/>
+    <path d="M288 64 L352 64 L352 128 L288 128 L320 96 Z"/>
+    <path d="M224 128 L288 128 L224 192 Z"/>
+    <path d="M224 192 L224 256 L160 192 Z"/>
+    <path d="M224 256 L224 320 L160 256 Z"/>
+  </g>
+</svg> 

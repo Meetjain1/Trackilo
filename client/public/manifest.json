@@ -1,0 +1,25 @@
+{
+  "short_name": "Trackilo",
+  "name": "Trackilo - Job Application Tracker",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "32x24",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x144"
+    },
+    {
+      "src": "logo512.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x384"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
