@@ -65,7 +65,7 @@ Trackilo is a modern, full-stack job application tracking system that helps job 
 - **ESLint** - Code linting
 - **Prettier** - Code formatting
 
-## 🔥 Key Features in Development
+## Key Features in Development
 
 - Email notifications for application updates
 - Calendar integration for interview scheduling
