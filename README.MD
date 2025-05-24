@@ -1,7 +1,5 @@
 # Trackilo - Job Application Tracking System
 
-![Trackilo Logo](./client/src/assets/images/logo.svg)
-
 Trackilo is a modern, full-stack job application tracking system that helps job seekers organize and monitor their job applications efficiently. With a clean, intuitive interface and powerful features, Trackilo makes it easy to keep track of your job search journey.
 
 ## Features
