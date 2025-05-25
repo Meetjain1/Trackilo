@@ -20,4 +20,8 @@ services:
       - key: GOOGLE_CLIENT_SECRET
         sync: false
       - key: SESSION_SECRET
-        generateValue: true 
+        generateValue: true
+      - key: DEPLOYMENT_KEY
+        generateValue: true
+      - key: AUTHORIZED_ORIGIN
+        value: https://trackilo.onrender.com 

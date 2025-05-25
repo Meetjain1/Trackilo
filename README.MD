@@ -1,3 +1,36 @@
+# ⚠️ IMPORTANT NOTICE - PROTECTED PROJECT ⚠️
+
+This is a personal project by Meet Jain. This repository is publicly visible for demonstration purposes only.
+
+## 🚫 WARNING: DO NOT COPY OR ATTEMPT TO RUN
+
+This project is protected by multiple security measures and will NOT function if copied or run without authorization. Any attempts to:
+- Fork this repository
+- Clone and run locally
+- Copy the code
+- Modify the project
+- Redistribute any part of the code
+
+Will result in:
+- Non-functional application
+- Runtime errors
+- Security blocks
+- Potential legal action
+
+## ⚖️ Legal Protection
+This project is protected by copyright law and includes proprietary security measures. Unauthorized use or attempts to circumvent security measures may result in legal consequences.
+
+## 🔒 Security Measures
+- Runtime code validation
+- Server-side authentication checks
+- Code obfuscation
+- Anti-tampering mechanisms
+- Deployment-specific security keys
+- IP-based access control
+
+## 📝 Contact
+For any inquiries about this project, please contact: meetofficialhere@gmail.com
+
 # Trackilo - Job Application Tracking System
 
 Trackilo is a modern, full-stack job application tracking system that helps job seekers organize and monitor their job applications efficiently. With a clean, intuitive interface and powerful features, Trackilo makes it easy to keep track of your job search journey.

