@@ -176,13 +176,17 @@ const AppProvider = ({ children }) => {
     }
   }, [getCurrentUser, state.user, queueRequest]);
 
-  // Display alert
+  // Alert helpers
   const displayAlert = useCallback(() => {
     dispatch({ type: DISPLAY_ALERT });
     const timeout = setTimeout(() => {
       dispatch({ type: CLEAR_ALERT });
     }, 3000);
     return () => clearTimeout(timeout);
+  }, []);
+
+  const clearAlert = useCallback(() => {
+    dispatch({ type: CLEAR_ALERT });
   }, []);
 
   const toggleSidebar = () => {
@@ -194,7 +198,6 @@ const AppProvider = ({ children }) => {
     try {
       const { data } = await authFetch.patch('/auth/updateUser', currentUser);
       const { user, location } = data;
-
       dispatch({
         type: UPDATE_USER_SUCCESS,
         payload: { user, location },
@@ -207,6 +210,9 @@ const AppProvider = ({ children }) => {
         });
       }
     }
+    setTimeout(() => {
+      dispatch({ type: CLEAR_ALERT });
+    }, 3000);
   };
 
   const handleChange = ({ name, value }) => {
@@ -237,7 +243,9 @@ const AppProvider = ({ children }) => {
         payload: { msg: error.response.data.msg },
       });
     }
-    clearAlert();
+    setTimeout(() => {
+      dispatch({ type: CLEAR_ALERT });
+    }, 3000);
   };
 
   const getJobs = async () => {
@@ -270,7 +278,6 @@ const AppProvider = ({ children }) => {
   };
   const editJob = async () => {
     dispatch({ type: EDIT_JOB_BEGIN });
-
     try {
       const { position, company, jobLocation, jobType, status } = state;
       await authFetch.patch(`/jobs/${state.editJobId}`, {
@@ -289,7 +296,9 @@ const AppProvider = ({ children }) => {
         payload: { msg: error.response.data.msg },
       });
     }
-    clearAlert();
+    setTimeout(() => {
+      dispatch({ type: CLEAR_ALERT });
+    }, 3000);
   };
   const deleteJob = async (jobId) => {
     dispatch({ type: DELETE_JOB_BEGIN });
@@ -343,11 +352,33 @@ const AppProvider = ({ children }) => {
     }
   };
 
+  // Setup user
+  const setupUser = async ({ currentUser, endPoint, alertText }) => {
+    dispatch({ type: SETUP_USER_BEGIN });
+    try {
+      const { data } = await axios.post(`/api/v1/auth/${endPoint}`, currentUser);
+      const { user, location } = data;
+      dispatch({
+        type: SETUP_USER_SUCCESS,
+        payload: { user, location, alertText },
+      });
+    } catch (error) {
+      dispatch({
+        type: SETUP_USER_ERROR,
+        payload: { msg: error.response?.data?.msg || 'An error occurred' },
+      });
+    }
+    setTimeout(() => {
+      dispatch({ type: CLEAR_ALERT });
+    }, 3000);
+  };
+
   return (
     <AppContext.Provider
       value={{
         ...state,
         displayAlert,
+        setupUser,
         toggleSidebar,
         logoutUser,
         updateUser,
