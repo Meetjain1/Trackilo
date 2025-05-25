@@ -400,3 +400,16 @@ if (
   console.error('\n\n==============================\n⚠️  This project is protected by Meet Jain.\n⚠️  You are not authorized to run this code outside the official deployment.\n⚠️  Exiting...\n==============================\n');
   process.exit(1);
 }
+
+// Additional security: Only allow running if MongoDB URI contains your cluster name
+const MONGO_CLUSTER = 'ac-lcza1ho-shard'; // Replace with your actual cluster name if different
+if (!process.env.MONGO_URL || !process.env.MONGO_URL.includes(MONGO_CLUSTER)) {
+  console.error('\n==============================\n⚠️  This project is protected by Meet Jain.\n⚠️  Invalid or missing MongoDB connection string.\n⚠️  Exiting...\n==============================\n');
+  process.exit(1);
+}
+
+// Optional: Print a warning if the repo URL is not the owner's
+const OWNER_REPO = 'https://github.com/Meetjain1/Trackilo';
+if (process.env.REPOSITORY_URL && process.env.REPOSITORY_URL !== OWNER_REPO) {
+  console.warn('\n==============================\n⚠️  WARNING: This project is not running from the official repository!\n⚠️  Official repo: ' + OWNER_REPO + '\n==============================\n');
+}
