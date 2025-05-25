@@ -75,10 +75,40 @@ const AppProvider = ({ children }) => {
   const MAX_RETRIES = 3;
   const RETRY_DELAY = 2000; // 2 seconds
 
-  // axios instance
+  // axios instance with production URL
   const authFetch = axios.create({
-    baseURL: '/api/v1',
+    baseURL: process.env.NODE_ENV === 'production' 
+      ? 'https://trackilo.onrender.com/api/v1'
+      : '/api/v1',
+    withCredentials: true,
+    headers: {
+      'Content-Type': 'application/json'
+    }
   });
+
+  // Add request interceptor
+  authFetch.interceptors.request.use(
+    (config) => {
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+
+  // Add response interceptor
+  authFetch.interceptors.response.use(
+    (response) => {
+      return response;
+    },
+    (error) => {
+      console.log(error.response);
+      if (error.response?.status === 401) {
+        logoutUser();
+      }
+      return Promise.reject(error);
+    }
+  );
 
   // Add debounce helper
   const debounce = useCallback((func, wait) => {
@@ -193,21 +223,6 @@ const AppProvider = ({ children }) => {
       }
     };
   }, [getCurrentUser, state.user, queueRequest, debounce]);
-
-  // response
-
-  authFetch.interceptors.response.use(
-    (response) => {
-      return response;
-    },
-    (error) => {
-      // console.log(error.response)
-      if (error.response.status === 401) {
-        logoutUser();
-      }
-      return Promise.reject(error);
-    }
-  );
 
   const displayAlert = () => {
     dispatch({ type: DISPLAY_ALERT });

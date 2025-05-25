@@ -238,9 +238,8 @@ app.use(
     proxy: true, // Trust the reverse proxy
     cookie: {
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000, // 1 day
-      domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined,
       httpOnly: true
     },
   })
@@ -257,7 +256,7 @@ app.use('/api/v1/auth/getCurrentUser', getCurrentUserLimiter);
 
 // Add CORS configuration before routes
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? PRODUCTION_URL : 'http://localhost:3000',
+  origin: true, // Allow all origins temporarily
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
