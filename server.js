@@ -1,3 +1,12 @@
+/**
+ * ⚠️ PROTECTED CODE - DO NOT COPY ⚠️
+ * 
+ * @author: Meet Jain
+ * @github: https://github.com/Meetjain1
+ * @project: Trackilo - Job Application Tracking System
+ * @copyright: Copyright (c) 2024 Meet Jain. All rights reserved.
+ */
+
 import express from 'express';
 import dotenv from 'dotenv';
 import 'express-async-errors';
@@ -152,28 +161,62 @@ if (!securityValidator.validateEnvironment()) {
   process.exit(1);
 }
 
+// Enhanced security middleware
+const enhancedSecurityMiddleware = (req, res, next) => {
+  // Check for suspicious headers
+  const suspiciousHeaders = ['x-debug', 'x-override', 'x-hack'];
+  if (suspiciousHeaders.some(header => req.headers[header])) {
+    return res.status(403).json({ error: 'Unauthorized request pattern detected' });
+  }
+
+  // Check request patterns
+  if (req.headers['user-agent']?.toLowerCase().includes('postman') ||
+      req.headers['user-agent']?.toLowerCase().includes('insomnia')) {
+    return res.status(403).json({ error: 'Unauthorized client' });
+  }
+
+  // Add security headers
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  res.setHeader('Content-Security-Policy', "default-src 'self'");
+
+  next();
+};
+
+// Apply enhanced security before other middleware
+app.use(enhancedSecurityMiddleware);
+
 // Add this after your existing rate limiters
-const securityMiddleware = (req, res, next) => {
+const advancedSecurityMiddleware = (req, res, next) => {
   if (!securityValidator.isValidEnvironment()) {
-    // Introduce random delays and errors
+    // Enhanced random errors and delays
     setTimeout(() => {
       const errors = [
-        'Internal Server Error',
-        'Service Unavailable',
-        'Bad Gateway',
-        'Gateway Timeout',
-        'Network Authentication Required'
+        { status: 500, message: 'Internal Server Error' },
+        { status: 503, message: 'Service Unavailable' },
+        { status: 502, message: 'Bad Gateway' },
+        { status: 504, message: 'Gateway Timeout' },
+        { status: 511, message: 'Network Authentication Required' },
+        { status: 418, message: 'I\'m a teapot' },
+        { status: 451, message: 'Unavailable For Legal Reasons' }
       ];
       const randomError = errors[Math.floor(Math.random() * errors.length)];
-      res.status(500).json({ error: randomError });
+      res.status(randomError.status).json({ 
+        error: randomError.message,
+        timestamp: new Date().toISOString(),
+        path: req.path,
+        message: 'Security violation detected. This incident has been logged.'
+      });
     }, Math.random() * 3000);
     return;
   }
   next();
 };
 
-// Apply security middleware to all routes
-app.use(securityMiddleware);
+// Apply advanced security middleware to all routes
+app.use(advancedSecurityMiddleware);
 
 // Add session support
 app.use(
@@ -221,9 +264,26 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Error handling
-app.use(notFoundMiddleware);
-app.use(errorHandlerMiddleware);
+// Enhanced error handling
+const enhancedErrorHandler = (err, req, res, next) => {
+  console.error(new Date().toISOString(), 'Error:', {
+    error: err.message,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    path: req.path,
+    method: req.method,
+    ip: req.ip,
+    headers: req.headers
+  });
+
+  // Send generic error in production
+  res.status(err.status || 500).json({
+    error: process.env.NODE_ENV === 'production' 
+      ? 'An unexpected error occurred' 
+      : err.message
+  });
+};
+
+app.use(enhancedErrorHandler);
 
 let server;
 let isShuttingDown = false;
@@ -332,3 +392,9 @@ process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
 
 start();
+
+/**
+ * ⚠️ END OF PROTECTED CODE ⚠️
+ * Copyright (c) 2024 Meet Jain
+ * All rights reserved.
+ */
