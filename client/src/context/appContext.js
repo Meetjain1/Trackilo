@@ -380,8 +380,10 @@ const AppProvider = ({ children }) => {
   const loginWithGoogle = async () => {
     dispatch({ type: 'GOOGLE_AUTH_BEGIN' });
     try {
-      // Use the full URL to avoid proxy issues
-      window.location.href = 'http://localhost:5001/api/v1/auth/google';
+      const baseUrl = process.env.NODE_ENV === 'production'
+        ? 'https://trackilo.onrender.com'
+        : 'http://localhost:5001';
+      window.location.href = `${baseUrl}/api/v1/auth/google`;
     } catch (error) {
       dispatch({
         type: 'GOOGLE_AUTH_ERROR',

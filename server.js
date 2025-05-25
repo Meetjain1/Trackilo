@@ -269,12 +269,11 @@ app.use('/api/v1/jobs', authenticateUser, jobsRouter);
 
 // Serve static files with caching
 if (process.env.NODE_ENV === 'production') {
-  app.use(
-    express.static(path.resolve(__dirname, './client/build'), {
-      maxAge: '1d'
-    })
-  );
-  app.get('*', (req, res) => {
+  // Serve static files from the React app
+  app.use(express.static(path.resolve(__dirname, './client/build')));
+  
+  // Handle React routing, return all requests to React app
+  app.get('*', function(req, res) {
     res.sendFile(path.resolve(__dirname, './client/build', 'index.html'));
   });
 } else {
