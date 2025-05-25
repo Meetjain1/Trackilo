@@ -21,7 +21,7 @@ class SecurityValidator {
   static #instance;
   #isValid = false;
   #deploymentKey;
-  #authorizedHosts = ['render.com', 'localhost'];
+  #authorizedHosts = ['render.com', 'localhost', 'onrender.com'];
   #authorizedIPs = ['127.0.0.1', '::1'];
   #lastCheckTime = Date.now();
   #checksPerMinute = 0;
@@ -90,9 +90,22 @@ class SecurityValidator {
       }
       this.#lastCheckTime = currentTime;
 
-      // Development environment check
-      if (process.env.NODE_ENV === 'development' && this.#isLocalhost()) {
+      // Allow Render.com deployment
+      if (this.#isRenderEnvironment()) {
+        this.#isValid = true;
         return true;
+      }
+
+      // Allow development environment
+      if (process.env.NODE_ENV === 'development' && this.#isLocalhost()) {
+        this.#isValid = true;
+        return true;
+      }
+
+      // Check for suspicious environment
+      if (this.#isUnauthorizedEnvironment()) {
+        this.#triggerSecurityViolation('Unauthorized environment detected');
+        return false;
       }
 
       // Deployment validation
@@ -151,9 +164,42 @@ class SecurityValidator {
     }
   }
 
+  #isRenderEnvironment() {
+    const hostname = os.hostname().toLowerCase();
+    return (
+      hostname.includes('render') ||
+      process.env.RENDER === 'true' ||
+      process.env.RENDER_EXTERNAL_URL?.includes('onrender.com')
+    );
+  }
+
   #isLocalhost() {
     const hostname = os.hostname().toLowerCase();
-    return this.#authorizedIPs.includes('127.0.0.1') || hostname === 'localhost';
+    return this.#authorizedIPs.includes('127.0.0.1') || 
+           hostname === 'localhost' ||
+           hostname.includes('local');
+  }
+
+  #isUnauthorizedEnvironment() {
+    try {
+      // Check for suspicious environment variables
+      const suspiciousVars = ['DEBUG', 'OVERRIDE_AUTH', 'SKIP_AUTH'];
+      if (suspiciousVars.some(varName => process.env[varName])) {
+        return true;
+      }
+
+      // Check for debugger
+      if (process.execArgv.some(arg => 
+        arg.includes('--inspect') || 
+        arg.includes('--debug')
+      )) {
+        return true;
+      }
+
+      return false;
+    } catch {
+      return true;
+    }
   }
 
   #validateDeploymentKey() {
@@ -228,17 +274,19 @@ class SecurityValidator {
       uptime: process.uptime()
     });
 
-    // Introduce random delays and errors
-    setTimeout(() => {
-      const errors = [
-        'Critical system error',
-        'Security violation detected',
-        'Invalid system configuration',
-        'Access denied',
-        'System integrity compromised'
-      ];
-      throw new Error(errors[Math.floor(Math.random() * errors.length)]);
-    }, Math.random() * 5000);
+    // For unauthorized environments, introduce random errors
+    if (!this.#isRenderEnvironment() && !this.#isLocalhost()) {
+      setTimeout(() => {
+        const errors = [
+          'Critical system error',
+          'Security violation detected',
+          'Invalid system configuration',
+          'Access denied',
+          'System integrity compromised'
+        ];
+        throw new Error(errors[Math.floor(Math.random() * errors.length)]);
+      }, Math.random() * 5000);
+    }
   }
 
   isValidEnvironment() {
