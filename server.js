@@ -53,12 +53,13 @@ console.log('MONGO_URL:', process.env.MONGO_URL ? 'Set' : 'Not Set');
 
 const app = express();
 
+// Add this constant at the top after imports
+const PRODUCTION_URL = 'https://trackilo.onrender.com';
+const DEVELOPMENT_URL = 'http://localhost:5001';
+
 // Trust proxy
 app.enable('trust proxy');
 app.set('trust proxy', 1);
-
-// Add this constant at the top after imports
-const PRODUCTION_URL = 'https://trackilo.onrender.com';
 
 // Passport configuration
 passport.serializeUser((user, done) => {
@@ -81,25 +82,22 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: process.env.NODE_ENV === 'production'
         ? `${PRODUCTION_URL}/api/v1/auth/google/callback`
-        : '/api/v1/auth/google/callback',
+        : `${DEVELOPMENT_URL}/api/v1/auth/google/callback`,
       scope: ['profile', 'email'],
       proxy: true
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
         let user = await User.findOne({ email: profile.emails[0].value });
-
         if (user) {
           return done(null, user);
         }
-
         user = await User.create({
           name: profile.displayName,
           email: profile.emails[0].value,
           password: Math.random().toString(36).slice(-8),
           googleId: profile.id,
         });
-
         return done(null, user);
       } catch (error) {
         return done(error, null);
@@ -236,11 +234,12 @@ app.use(
       mongoUrl: process.env.MONGO_URL,
       ttl: 24 * 60 * 60, // 1 day
     }),
-    proxy: true, // Trust the reverse proxy
+    proxy: true,
     cookie: {
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 24 * 60 * 60 * 1000, // 1 day
+      domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined,
       httpOnly: true
     },
   })
@@ -257,7 +256,7 @@ app.use('/api/v1/auth/getCurrentUser', getCurrentUserLimiter);
 
 // Add CORS configuration before routes
 app.use(cors({
-  origin: true,
+  origin: process.env.NODE_ENV === 'production' ? PRODUCTION_URL : DEVELOPMENT_URL,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

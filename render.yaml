@@ -11,10 +11,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 10000
-    healthCheckPath: /api/v1/auth/check-status
-    autoDeploy: true
-    envVars:
+        value: 5001
       - key: MONGO_URL
         sync: false
       - key: JWT_SECRET
@@ -27,7 +24,7 @@ services:
         sync: false
       - key: SESSION_SECRET
         generateValue: true
-      - key: DEPLOYMENT_KEY
-        generateValue: true
-      - key: AUTHORIZED_ORIGIN
-        value: https://trackilo.onrender.com 
+      - key: DEPLOYMENT_URL
+        value: https://trackilo.onrender.com
+    healthCheckPath: /api/v1/auth/check-status
+    autoDeploy: true 
