@@ -105,15 +105,6 @@ const AppProvider = ({ children }) => {
     }
   );
 
-  // Add debounce helper
-  const debounce = useCallback((func, wait) => {
-    let timeout;
-    return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-  }, []);
-
   // Add request queue
   const requestQueue = useRef([]);
   const isProcessing = useRef(false);
@@ -143,39 +134,6 @@ const AppProvider = ({ children }) => {
     processQueue();
   }, [processQueue]);
 
-  // Logout user
-  const logoutUser = useCallback(async () => {
-    try {
-      await authFetch.get('/auth/logout');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-    dispatch({ type: LOGOUT_USER });
-  }, [authFetch]);
-
-  // Optimized getCurrentUser
-  const getCurrentUser = useCallback(async () => {
-    dispatch({ type: GET_CURRENT_USER_BEGIN });
-    try {
-      const { data } = await authFetch('/auth/getCurrentUser');
-      const { user, location } = data;
-      dispatch({ type: GET_CURRENT_USER_SUCCESS, payload: { user, location } });
-    } catch (error) {
-      if (error.response?.status === 401) return;
-      logoutUser();
-    }
-  }, [authFetch, logoutUser]);
-
-  // Use effect for getCurrentUser
-  useEffect(() => {
-    if (!state.user) {
-      const cleanup = setTimeout(() => {
-        queueRequest(getCurrentUser);
-      }, 1000);
-      return () => clearTimeout(cleanup);
-    }
-  }, [getCurrentUser, state.user, queueRequest]);
-
   // Alert helpers
   const displayAlert = useCallback(() => {
     dispatch({ type: DISPLAY_ALERT });
@@ -188,6 +146,39 @@ const AppProvider = ({ children }) => {
   const clearAlert = useCallback(() => {
     dispatch({ type: CLEAR_ALERT });
   }, []);
+
+  // Logout user
+  const logoutUser = useCallback(async () => {
+    try {
+      await authFetch.get('/auth/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+    dispatch({ type: LOGOUT_USER });
+  }, [authFetch]);
+
+  // Get current user
+  const getCurrentUser = useCallback(async () => {
+    dispatch({ type: GET_CURRENT_USER_BEGIN });
+    try {
+      const { data } = await authFetch('/auth/getCurrentUser');
+      const { user, location } = data;
+      dispatch({ type: GET_CURRENT_USER_SUCCESS, payload: { user, location } });
+    } catch (error) {
+      if (error.response?.status === 401) return;
+      logoutUser();
+    }
+  }, [authFetch, logoutUser]);
+
+  // Check and load user on mount
+  useEffect(() => {
+    if (!state.user) {
+      const timeout = setTimeout(() => {
+        queueRequest(getCurrentUser);
+      }, 1000);
+      return () => clearTimeout(timeout);
+    }
+  }, [getCurrentUser, state.user, queueRequest]);
 
   const toggleSidebar = () => {
     dispatch({ type: TOGGLE_SIDEBAR });
