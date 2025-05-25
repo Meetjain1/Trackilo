@@ -70,12 +70,8 @@ const AppContext = React.createContext();
 
 const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const retryTimeoutRef = useRef(null);
-  const retryCountRef = useRef(0);
-  const MAX_RETRIES = 3;
-  const RETRY_DELAY = 2000; // 2 seconds
 
-  // axios instance with production URL
+  // axios instance
   const authFetch = axios.create({
     baseURL: '/api/v1',
     withCredentials: true,
@@ -118,20 +114,6 @@ const AppProvider = ({ children }) => {
     };
   }, []);
 
-  // Add retry helper
-  const retryWithBackoff = useCallback(async (fn, retryCount = 0) => {
-    try {
-      return await fn();
-    } catch (error) {
-      if (retryCount >= MAX_RETRIES) {
-        throw error;
-      }
-      const delay = RETRY_DELAY * Math.pow(2, retryCount);
-      await new Promise(resolve => setTimeout(resolve, delay));
-      return retryWithBackoff(fn, retryCount + 1);
-    }
-  }, []);
-
   // Add request queue
   const requestQueue = useRef([]);
   const isProcessing = useRef(false);
@@ -169,7 +151,7 @@ const AppProvider = ({ children }) => {
       console.error('Logout error:', error);
     }
     dispatch({ type: LOGOUT_USER });
-  }, []);
+  }, [authFetch]);
 
   // Optimized getCurrentUser
   const getCurrentUser = useCallback(async () => {
@@ -179,60 +161,29 @@ const AppProvider = ({ children }) => {
       const { user, location } = data;
       dispatch({ type: GET_CURRENT_USER_SUCCESS, payload: { user, location } });
     } catch (error) {
-      if (error.response.status === 401) return;
+      if (error.response?.status === 401) return;
       logoutUser();
     }
   }, [authFetch, logoutUser]);
 
-  // Optimized setupUser
-  const setupUser = useCallback(async ({ currentUser, endPoint, alertText }) => {
-    dispatch({ type: SETUP_USER_BEGIN });
-    try {
-      const response = await retryWithBackoff(async () => {
-        return await axios.post(`/api/v1/auth/${endPoint}`, currentUser);
-      });
-
-      const { user, location } = response.data;
-      dispatch({
-        type: SETUP_USER_SUCCESS,
-        payload: { user, location, alertText },
-      });
-    } catch (error) {
-      dispatch({
-        type: SETUP_USER_ERROR,
-        payload: { msg: error.response?.data?.msg || 'An error occurred' },
-      });
-    }
-    clearAlert();
-  }, [retryWithBackoff]);
-
-  // Use debounced getCurrentUser
+  // Use effect for getCurrentUser
   useEffect(() => {
-    const debouncedGetCurrentUser = debounce(() => {
-      if (!state.user) {
+    if (!state.user) {
+      const cleanup = setTimeout(() => {
         queueRequest(getCurrentUser);
-      }
-    }, 1000);
+      }, 1000);
+      return () => clearTimeout(cleanup);
+    }
+  }, [getCurrentUser, state.user, queueRequest]);
 
-    debouncedGetCurrentUser();
-
-    return () => {
-      if (retryTimeoutRef.current) {
-        clearTimeout(retryTimeoutRef.current);
-      }
-    };
-  }, [getCurrentUser, state.user, queueRequest, debounce]);
-
-  const displayAlert = () => {
+  // Display alert
+  const displayAlert = useCallback(() => {
     dispatch({ type: DISPLAY_ALERT });
-    clearAlert();
-  };
-
-  const clearAlert = () => {
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       dispatch({ type: CLEAR_ALERT });
     }, 3000);
-  };
+    return () => clearTimeout(timeout);
+  }, []);
 
   const toggleSidebar = () => {
     dispatch({ type: TOGGLE_SIDEBAR });
@@ -256,15 +207,16 @@ const AppProvider = ({ children }) => {
         });
       }
     }
-    clearAlert();
   };
 
   const handleChange = ({ name, value }) => {
     dispatch({ type: HANDLE_CHANGE, payload: { name, value } });
   };
+
   const clearValues = () => {
     dispatch({ type: CLEAR_VALUES });
   };
+
   const createJob = async () => {
     dispatch({ type: CREATE_JOB_BEGIN });
     try {
@@ -396,7 +348,6 @@ const AppProvider = ({ children }) => {
       value={{
         ...state,
         displayAlert,
-        setupUser,
         toggleSidebar,
         logoutUser,
         updateUser,
