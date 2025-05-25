@@ -54,6 +54,7 @@ console.log('MONGO_URL:', process.env.MONGO_URL ? 'Set' : 'Not Set');
 const app = express();
 
 // Trust proxy
+app.enable('trust proxy');
 app.set('trust proxy', 1);
 
 // Add this constant at the top after imports
@@ -256,10 +257,10 @@ app.use('/api/v1/auth/getCurrentUser', getCurrentUserLimiter);
 
 // Add CORS configuration before routes
 app.use(cors({
-  origin: true, // Allow all origins temporarily
+  origin: true,
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
   exposedHeaders: ['set-cookie']
 }));
 
@@ -340,38 +341,23 @@ const gracefulShutdown = async () => {
 };
 
 const start = async () => {
-  let retries = 5;
-  
-  while (retries > 0) {
-    try {
-      // Connect to MongoDB
-      await connectDB(process.env.MONGO_URL);
-      console.log('MongoDB Connected successfully');
+  try {
+    // Connect to MongoDB
+    await connectDB(process.env.MONGO_URL);
+    console.log('MongoDB Connected successfully');
 
-      // Use port 10000 for Render or fallback to environment variable
-      const port = process.env.PORT || 10000;
-      
-      // Start server
-      server = app.listen(port, '0.0.0.0', () => {
-        console.log(`Server is running on port ${port}`);
-        if (process.env.NODE_ENV !== 'production') {
-          console.log(`API available at http://localhost:${port}/api/v1`);
-        }
-      });
+    // Use Render's assigned port or fallback to 10000
+    const port = process.env.PORT || 10000;
+    
+    // Start server
+    server = app.listen(port, '0.0.0.0', () => {
+      console.log(`Server is running on port ${port}`);
+      console.log('Node Environment:', process.env.NODE_ENV);
+    });
 
-      break; // If we get here, everything worked
-    } catch (error) {
-      console.error(`Attempt ${6 - retries}/5 failed:`, error);
-      retries--;
-      
-      if (retries === 0) {
-        console.error('Server startup failed after 5 attempts');
-        process.exit(1);
-      }
-      
-      // Wait before retrying
-      await new Promise(resolve => setTimeout(resolve, 5000));
-    }
+  } catch (error) {
+    console.error('Server startup failed:', error);
+    process.exit(1);
   }
 };
 
