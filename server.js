@@ -26,6 +26,7 @@ import MongoStore from 'connect-mongo';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import securityValidator from './utils/securityCheck.js';
+import cors from 'cors';
 
 // db and authenticateUser
 import connectDB from './db/connect.js';
@@ -55,6 +56,9 @@ const app = express();
 // Trust proxy
 app.set('trust proxy', 1);
 
+// Add this constant at the top after imports
+const PRODUCTION_URL = 'https://trackilo.onrender.com';
+
 // Passport configuration
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -74,8 +78,11 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: '/api/v1/auth/google/callback',
+      callbackURL: process.env.NODE_ENV === 'production'
+        ? `${PRODUCTION_URL}/api/v1/auth/google/callback`
+        : '/api/v1/auth/google/callback',
       scope: ['profile', 'email'],
+      proxy: true
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -228,9 +235,13 @@ app.use(
       mongoUrl: process.env.MONGO_URL,
       ttl: 24 * 60 * 60, // 1 day
     }),
+    proxy: true, // Trust the reverse proxy
     cookie: {
       secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 24 * 60 * 60 * 1000, // 1 day
+      domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined,
+      httpOnly: true
     },
   })
 );
@@ -243,6 +254,15 @@ app.use(passport.session());
 app.use('/api/v1/auth/register', authLimiter);
 app.use('/api/v1/auth/login', authLimiter);
 app.use('/api/v1/auth/getCurrentUser', getCurrentUserLimiter);
+
+// Add CORS configuration before routes
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' ? PRODUCTION_URL : 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  exposedHeaders: ['set-cookie']
+}));
 
 // API routes
 app.use('/api/v1/auth', authRouter);
