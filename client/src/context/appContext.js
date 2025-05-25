@@ -77,9 +77,7 @@ const AppProvider = ({ children }) => {
 
   // axios instance with production URL
   const authFetch = axios.create({
-    baseURL: process.env.NODE_ENV === 'production' 
-      ? 'https://trackilo.onrender.com/api/v1'
-      : '/api/v1',
+    baseURL: '/api/v1',
     withCredentials: true,
     headers: {
       'Content-Type': 'application/json'
@@ -92,6 +90,7 @@ const AppProvider = ({ children }) => {
       return config;
     },
     (error) => {
+      console.error('Request error:', error);
       return Promise.reject(error);
     }
   );
@@ -102,7 +101,7 @@ const AppProvider = ({ children }) => {
       return response;
     },
     (error) => {
-      console.log(error.response);
+      console.error('Response error:', error);
       if (error.response?.status === 401) {
         logoutUser();
       }

@@ -267,14 +267,18 @@ app.use(cors({
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/jobs', authenticateUser, jobsRouter);
 
-// Serve static files with caching
+// Serve static files and handle client routing
 if (process.env.NODE_ENV === 'production') {
-  // Serve static files from the React app
-  app.use(express.static(path.resolve(__dirname, './client/build')));
+  // Serve static files
+  const buildPath = path.resolve(__dirname, './client/build');
+  app.use(express.static(buildPath));
   
-  // Handle React routing, return all requests to React app
-  app.get('*', function(req, res) {
-    res.sendFile(path.resolve(__dirname, './client/build', 'index.html'));
+  // Serve index.html for all routes except /api
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(buildPath, 'index.html'));
   });
 } else {
   app.get('/', (req, res) => {
@@ -282,26 +286,9 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Enhanced error handling
-const enhancedErrorHandler = (err, req, res, next) => {
-  console.error(new Date().toISOString(), 'Error:', {
-    error: err.message,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-    path: req.path,
-    method: req.method,
-    ip: req.ip,
-    headers: req.headers
-  });
-
-  // Send generic error in production
-  res.status(err.status || 500).json({
-    error: process.env.NODE_ENV === 'production' 
-      ? 'An unexpected error occurred' 
-      : err.message
-  });
-};
-
-app.use(enhancedErrorHandler);
+// Error handling middleware should be after all routes
+app.use(notFoundMiddleware);
+app.use(errorHandlerMiddleware);
 
 let server;
 let isShuttingDown = false;
