@@ -3,19 +3,11 @@
 This is a personal project by Meet Jain. This repository is publicly visible for demonstration purposes only.
 
 Author: Meet Jain
-This project is protected. Do not copy, fork, or reuse without permission.
-Unauthorized use is strictly prohibited. Only the official deployment is allowed to run.
+- This project is protected. Do not copy, fork, or reuse without permission.
+- Unauthorized use is strictly prohibited. Only the official deployment is allowed to run.
 
 ## Legal Protection
 This project is protected by copyright law and includes proprietary security measures. Unauthorized use or attempts to circumvent security measures may result in legal consequences.
-
-## Security Measures
-- Runtime code validation
-- Server-side authentication checks
-- Code obfuscation
-- Anti-tampering mechanisms
-- Deployment-specific security keys
-- IP-based access control
 
 ## Contact
 For any inquiries about this project please contact: meetofficialhere@gmail.com
