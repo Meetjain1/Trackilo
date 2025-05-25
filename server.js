@@ -343,29 +343,24 @@ const start = async () => {
   let retries = 5;
   
   while (retries > 0) {
-  try {
+    try {
       // Connect to MongoDB
       await connectDB(process.env.MONGO_URL);
       console.log('MongoDB Connected successfully');
 
-      // Find available port
-      const preferredPort = process.env.PORT || 5000;
-      const port = await findAvailablePort(preferredPort);
+      // Use port 10000 for Render or fallback to environment variable
+      const port = process.env.PORT || 10000;
       
-      if (port !== preferredPort) {
-        console.log(`Port ${preferredPort} was in use, using port ${port} instead`);
-      }
-
       // Start server
-      server = app.listen(port, () => {
+      server = app.listen(port, '0.0.0.0', () => {
         console.log(`Server is running on port ${port}`);
         if (process.env.NODE_ENV !== 'production') {
           console.log(`API available at http://localhost:${port}/api/v1`);
         }
-    });
+      });
 
       break; // If we get here, everything worked
-  } catch (error) {
+    } catch (error) {
       console.error(`Attempt ${6 - retries}/5 failed:`, error);
       retries--;
       
