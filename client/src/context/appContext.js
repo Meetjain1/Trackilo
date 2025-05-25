@@ -73,7 +73,7 @@ const AppProvider = ({ children }) => {
 
   // axios instance
   const authFetch = axios.create({
-    baseURL: '/api/v1',
+    baseURL: process.env.NODE_ENV === 'production' ? 'https://trackilo.onrender.com/api/v1' : '/api/v1',
     withCredentials: true,
     headers: {
       'Content-Type': 'application/json'

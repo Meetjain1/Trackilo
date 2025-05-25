@@ -256,7 +256,7 @@ app.use('/api/v1/auth/getCurrentUser', getCurrentUserLimiter);
 
 // Add CORS configuration before routes
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? PRODUCTION_URL : DEVELOPMENT_URL,
+  origin: process.env.NODE_ENV === 'production' ? 'https://trackilo.onrender.com' : 'http://localhost:3000',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
