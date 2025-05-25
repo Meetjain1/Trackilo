@@ -144,50 +144,16 @@ const AppProvider = ({ children }) => {
 
   // Optimized getCurrentUser
   const getCurrentUser = useCallback(async () => {
-    // Skip if we already have user data
-    if (state.user && !state.userLoading) {
-      return;
-    }
-
-    // Clear any existing retry timeout
-    if (retryTimeoutRef.current) {
-      clearTimeout(retryTimeoutRef.current);
-      retryTimeoutRef.current = null;
-    }
-
     dispatch({ type: GET_CURRENT_USER_BEGIN });
-    
     try {
-      const response = await retryWithBackoff(async () => {
-        return await authFetch.get('/auth/getCurrentUser');
-      });
-
-      const { user, location } = response.data;
-      
-      dispatch({
-        type: GET_CURRENT_USER_SUCCESS,
-        payload: { user, location },
-      });
-
-      // Reset retry count on success
-      retryCountRef.current = 0;
+      const { data } = await authFetch('/auth/getCurrentUser');
+      const { user, location } = data;
+      dispatch({ type: GET_CURRENT_USER_SUCCESS, payload: { user, location } });
     } catch (error) {
-      if (error.response?.status === 401) {
-        logoutUser();
-        return;
-      }
-
-      // If we haven't exceeded max retries, try again
-      if (retryCountRef.current < MAX_RETRIES) {
-        retryCountRef.current++;
-        retryTimeoutRef.current = setTimeout(() => {
-          getCurrentUser();
-        }, RETRY_DELAY * Math.pow(2, retryCountRef.current));
-      } else {
-        logoutUser();
-      }
+      if (error.response.status === 401) return;
+      logoutUser();
     }
-  }, [state.user, state.userLoading, logoutUser, retryWithBackoff]);
+  }, [authFetch, logoutUser]);
 
   // Optimized setupUser
   const setupUser = useCallback(async ({ currentUser, endPoint, alertText }) => {
@@ -389,9 +355,9 @@ const AppProvider = ({ children }) => {
     }
     clearAlert();
   };
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     dispatch({ type: CLEAR_FILTERS });
-  };
+  }, []);
   const changePage = (page) => {
     dispatch({ type: CHANGE_PAGE, payload: { page } });
   };

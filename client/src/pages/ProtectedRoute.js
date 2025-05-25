@@ -1,64 +1,31 @@
 import { useAppContext } from '../context/appContext';
 import { Navigate } from 'react-router-dom';
-import LoadingFallback from '../components/LoadingFallback';
-import { useDarkMode } from '../context/darkModeContext';
 import { useState, useEffect } from 'react';
+import Loading from '../components/Loading';
 
 const ProtectedRoute = ({ children }) => {
   const { user, userLoading } = useAppContext();
-  const { isDarkMode } = useDarkMode();
-  const [showTimeout, setShowTimeout] = useState(false);
-  const [loadingStartTime, setLoadingStartTime] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingStartTime] = useState(Date.now());
 
   useEffect(() => {
-    if (userLoading && !loadingStartTime) {
-      setLoadingStartTime(Date.now());
-    } else if (!userLoading) {
-      setLoadingStartTime(null);
-      setShowTimeout(false);
-    }
-  }, [userLoading]);
-
-  useEffect(() => {
-    let timeoutId;
+    const MINIMUM_LOADING_TIME = 1000; // 1 second minimum loading time
+    const timeElapsed = Date.now() - loadingStartTime;
     
-    if (loadingStartTime) {
-      timeoutId = setTimeout(() => {
-        const loadingDuration = Date.now() - loadingStartTime;
-        if (loadingDuration >= 8000) { // Show timeout after 8 seconds
-          setShowTimeout(true);
-        }
-      }, 8000);
+    if (!userLoading) {
+      const remainingTime = Math.max(0, MINIMUM_LOADING_TIME - timeElapsed);
+      const timer = setTimeout(() => setLoading(false), remainingTime);
+      return () => clearTimeout(timer);
     }
+  }, [userLoading, loadingStartTime]);
 
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [loadingStartTime]);
-
-  if (userLoading) {
-    if (showTimeout) {
-      return <LoadingFallback isDarkMode={isDarkMode} />;
-    }
-    return (
-      <div className="loading-center" style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: isDarkMode ? 'var(--dark-background)' : 'var(--backgroundColor)'
-      }}>
-        <div className="loading"></div>
-      </div>
-    );
+  if (loading || userLoading) {
+    return <Loading center />;
   }
 
   if (!user) {
     return <Navigate to='/landing' />;
   }
-
   return children;
 };
 
