@@ -1,26 +1,17 @@
-# ⚠️ IMPORTANT NOTICE - PROTECTED PROJECT ⚠️
+# =============================
+# ⚠️ PROTECTED CODE - DO NOT COPY ⚠️
 
 This is a personal project by Meet Jain. This repository is publicly visible for demonstration purposes only.
 
-## 🚫 WARNING: DO NOT COPY OR ATTEMPT TO RUN
+# Author: Meet Jain
+# This project is protected. Do not copy, fork, or reuse without permission.
+# Unauthorized use is strictly prohibited. Only the official deployment is allowed to run.
+# =============================
 
-This project is protected by multiple security measures and will NOT function if copied or run without authorization. Any attempts to:
-- Fork this repository
-- Clone and run locally
-- Copy the code
-- Modify the project
-- Redistribute any part of the code
-
-Will result in:
-- Non-functional application
-- Runtime errors
-- Security blocks
-- Potential legal action
-
-## ⚖️ Legal Protection
+## Legal Protection
 This project is protected by copyright law and includes proprietary security measures. Unauthorized use or attempts to circumvent security measures may result in legal consequences.
 
-## 🔒 Security Measures
+## Security Measures
 - Runtime code validation
 - Server-side authentication checks
 - Code obfuscation
@@ -28,8 +19,8 @@ This project is protected by copyright law and includes proprietary security mea
 - Deployment-specific security keys
 - IP-based access control
 
-## 📝 Contact
-For any inquiries about this project, please contact: meetofficialhere@gmail.com
+## Contact
+For any inquiries about this project please contact: meetofficialhere@gmail.com
 
 # Trackilo - Job Application Tracking System
 
