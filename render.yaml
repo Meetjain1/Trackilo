@@ -27,4 +27,12 @@ services:
       - key: DEPLOYMENT_URL
         value: https://trackilo.onrender.com
     healthCheckPath: /api/v1/auth/check-status
-    autoDeploy: true 
+    autoDeploy: true
+    pullRequestPreviewsEnabled: true
+    numInstances: 1
+    buildFilter:
+      paths:
+        - client/**
+        - server.js
+        - package.json
+        - render.yaml 
