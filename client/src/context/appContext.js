@@ -1,3 +1,10 @@
+// =============================
+// ⚠️ PROTECTED CODE - DO NOT COPY ⚠️
+// Author: Meet Jain
+// This project is protected. Do not copy, fork, or reuse without permission.
+// Unauthorized use is strictly prohibited.
+// =============================
+
 import React, { useReducer, useContext, useEffect, useCallback, useRef } from 'react';
 
 import reducer from './reducer';

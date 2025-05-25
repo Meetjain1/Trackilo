@@ -392,3 +392,11 @@ start();
  * Copyright (c) 2024 Meet Jain
  * All rights reserved.
  */
+
+if (
+  process.env.RENDER !== 'true' ||
+  process.env.MEETJAIN_PROTECTED !== 'true'
+) {
+  console.error('\n\n==============================\n⚠️  This project is protected by Meet Jain.\n⚠️  You are not authorized to run this code outside the official deployment.\n⚠️  Exiting...\n==============================\n');
+  process.exit(1);
+}
