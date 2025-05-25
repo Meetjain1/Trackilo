@@ -8,10 +8,10 @@
     "install-dependencies": "npm run install-client && npm install",
     "setup-production": "npm run install-client && npm run build-client && npm install",
     "install-client": "cd client && npm install",
-    "build-client": "cd client && npm run build",
+    "build-client": "cd client && npm run build && node ../build.js",
     "server": "nodemon server --ignore client",
     "client": "npm start --prefix client",
-    "start": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\""
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
@@ -39,6 +39,8 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "validator": "^13.7.0",
-    "xss-clean": "^0.1.1"
+    "xss-clean": "^0.1.1",
+    "esbuild": "^0.19.12",
+    "javascript-obfuscator": "^4.1.0"
   }
 }

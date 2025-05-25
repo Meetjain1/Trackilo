@@ -1,0 +1,9 @@
+Contact: mailto: meetofficialhere@gmail.com
+Expires: 2025-12-31T23:59:59.999Z
+Encryption: N/A
+Preferred-Languages: en
+Canonical: https://github.com/Meetjain1/Trackilo/security.txt
+Policy: All rights reserved. Unauthorized copying, modification, distribution, or use of this software is strictly prohibited.
+Hiring: No
+
+This software is protected by copyright law. Any attempt to reverse engineer, decompile, or redistribute this software without explicit permission is prohibited and may result in legal action. 
